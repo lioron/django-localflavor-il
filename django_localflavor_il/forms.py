@@ -73,11 +73,11 @@ class ILPhoneNumberField(CharField):
         }
 
     def __init__(self, max_length=14, min_length=10, *args, **kwargs):
-        super(FRPhoneNumberField, self).__init__(
+        super(ILPhoneNumberField, self).__init__(
             max_length, min_length, *args, **kwargs)
 
     def clean(self, value):
-        super(FRPhoneNumberField, self).clean(value)
+        super(ILPhoneNumberField, self).clean(value)
         if value in EMPTY_VALUES:
             return ''
         value = re.sub('(\.|\s)', '', smart_text(value))
