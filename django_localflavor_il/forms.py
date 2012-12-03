@@ -21,6 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 # (hebrew) http://he.wikipedia.org/wiki/%D7%A1%D7%A4%D7%A8%D7%AA_%D7%91%D7%99%D7%A7%D7%95%D7%A8%D7%AA
 
 id_number_re = re.compile(r'^(?P<number>\d{1,8})-?(?P<check>\d)$')
+phone_digits_re = re.compile(r"^0([2,3,4,8,9]|5[0,2,3,4,7,8]|7[2,7]){1}\d{7,8}$")
 
 class ILPostalCodeField(RegexField):
     """
@@ -65,3 +66,22 @@ class ILIDNumberField(Field):
         if not luhn(value):
             raise ValidationError(self.error_messages['invalid'])
         return value
+        
+class ILPhoneNumberField(CharField):
+    default_error_messages = {
+        'invalid': _('חייב להיות מספר טלפון תקין'),
+        }
+
+    def __init__(self, max_length=14, min_length=10, *args, **kwargs):
+        super(FRPhoneNumberField, self).__init__(
+            max_length, min_length, *args, **kwargs)
+
+    def clean(self, value):
+        super(FRPhoneNumberField, self).clean(value)
+        if value in EMPTY_VALUES:
+            return ''
+        value = re.sub('(\.|\s)', '', smart_text(value))
+        m = phone_digits_re.search(value)
+        if m:
+            return '%s %s %s %s %s' % (value[0:2], value[2:4], value[4:6], value[6:8], value[8:10])
+        raise ValidationError(self.error_messages['invalid'])
